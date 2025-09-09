@@ -29,3 +29,6 @@ Thumbs.db
 # Ignora arquivos de uploads e mídias temporárias
 uploads/
 temp_media/
+storage/
+*.cache
+.cache/

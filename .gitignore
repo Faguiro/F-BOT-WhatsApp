@@ -1,7 +1,6 @@
 # Ignora arquivos de build/transpiled
-/dist/
-/build/
-/node_modules/
+build/
+node_modules/
 
 # Logs
 *.log
@@ -28,5 +27,5 @@ Thumbs.db
 *.db
 
 # Ignora arquivos de uploads e mídias temporárias
-/uploads/
-/temp_media/
+uploads/
+temp_media/

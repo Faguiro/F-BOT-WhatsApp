@@ -1,0 +1,32 @@
+# Ignora arquivos de build/transpiled
+/dist/
+/build/
+/node_modules/
+
+# Logs
+*.log
+
+# Arquivos de configuração sensíveis
+.env
+*.env
+
+# Cache do editor
+.vscode/
+*.swp
+
+# Arquivos temporários
+*.tmp
+*.bak
+*bot.json
+
+# Diretórios do sistema
+.DS_Store
+Thumbs.db
+
+# Ignora arquivos de banco de dados locais
+*.sqlite
+*.db
+
+# Ignora arquivos de uploads e mídias temporárias
+/uploads/
+/temp_media/

@@ -145,6 +145,14 @@ const miscCommands = {
         },
         function: miscFunctions.chanceCommand
     },
+    frasex: {
+        guide: `Ex: *{$p}frasex* - Exibe uma frase divertida do capetinha 😍😈.\n`,
+        msgs: {
+            reply: "😈 *Frasex do Capetinha*\n\n" +
+                '{$1}'
+        },
+        function: miscFunctions.frasexCommand
+    },
     frase: {
         guide: `Ex: *{$p}fch* - Exibe uma frase aleatória montada com as cartas do jogo Cartas contra a Humanidade.\n`,
         msgs: {
@@ -153,5 +161,6 @@ const miscCommands = {
         },
         function: miscFunctions.fraseCommand
     }
+
 };
 export default miscCommands;

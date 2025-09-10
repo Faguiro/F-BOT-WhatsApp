@@ -433,3 +433,48 @@ export async function funnyRandomPhrases() {
         throw new Error(botTexts.library_error);
     }
 }
+
+/**
+ * Retorna uma frase divertida aleatória do capetinha 😍😈 
+ * Agora randomiza entre 2 gists diferentes
+ */
+export async function funnyRandomPhrasesx() {
+    try {
+        // URLs disponíveis
+        const URLS = [
+            'https://gist.githubusercontent.com/Faguiro/635046be657cf26a2d59b152d9b9feeb/raw/77e011cdbfdd4a777aed0e273c8d791246524863/frasex.json',
+            'https://gist.githubusercontent.com/Faguiro/52adfc7cb0913ee68538b9b7b63122ea/raw/00daca75bf527e29abeb870ca11615868f9f1145/frasexx.json'
+        ];
+
+        // Escolhe uma das URLs aleatoriamente
+        const randomUrl = URLS[Math.floor(Math.random() * URLS.length)];
+
+        // Busca os dados
+        let { data } = await axios.get(randomUrl);
+
+        // Escolhe frase aleatória
+        let fraseEscolhida = data.frases[Math.floor(Math.random() * data.frases.length)];
+
+        // Define quantos placeholders existem
+        let cont_params = 1;
+        if (fraseEscolhida.indexOf("{p3}") !== -1) {
+            cont_params = 3;
+        } else if (fraseEscolhida.indexOf("{p2}") !== -1) {
+            cont_params = 2;
+        }
+
+        // Substitui os placeholders pelos complementos
+        for (let i = 1; i <= cont_params; i++) {
+            let complementoEscolhido = data.complementos[Math.floor(Math.random() * data.complementos.length)];
+            fraseEscolhida = fraseEscolhida.replace(`{p${i}}`, `*${complementoEscolhido}*`);
+
+            // Remove complemento já usado para não repetir
+            data.complementos.splice(data.complementos.indexOf(complementoEscolhido), 1);
+        }
+
+        return fraseEscolhida;
+    } catch (err) {
+        showConsoleLibraryError(err, 'funnyRandomPhrasesx');
+        throw new Error(botTexts.library_error);
+    }
+}

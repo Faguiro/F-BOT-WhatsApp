@@ -4,6 +4,10 @@ import { buildText, messageErrorCommandUsage, uppercaseFirst } from "../utils/ge
 import botTexts from "../helpers/bot.texts.helper.js";
 import miscCommands from "./misc.list.commands.js";
 import { GroupController } from "../controllers/group.controller.js";
+// import { funnyRandomPhrases, frasex } from '../utils/misc.util.js';
+import { funnyRandomPhrasesx } from '../utils/misc.util.js';
+
+
 import path from 'path';
 export async function sorteioCommand(client, botInfo, message, group) {
     if (!message.args.length) {
@@ -276,3 +280,10 @@ export async function fraseCommand(client, botInfo, message, group) {
     const imagePath = path.resolve('dist/media/frasewhatsappjr.png');
     await waUtil.replyFile(client, message.chat_id, 'imageMessage', imagePath, replyText, message.wa_message, { expiration: message.expiration });
 }
+export async function frasexCommand(client, botInfo, message, group) {
+    const phraseResult = await funnyRandomPhrasesx();
+    const replyText = buildText(miscCommands.frasex.msgs.reply, phraseResult);
+    const imagePath = path.resolve('dist/media/frasex.png');
+    await waUtil.replyFile(client, message.chat_id, 'imageMessage', imagePath, replyText, message.wa_message, { expiration: message.expiration });
+}
+

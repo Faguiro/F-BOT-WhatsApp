@@ -234,6 +234,7 @@ export const miscMenu = (botInfo) => {
 *|*━━ ✦ 🧩 *ENTRETENIMENTO* ✦
 *|*► *${prefix}mascote* - Onipotente e onipresente 🦉Corujito
 *|*► *${prefix}frase* - Frase dúvidosa do 🦉Corujito
+*|*► *${prefix}frasex* - Frase divertida do capetinha 😍😈
 *|*► *${prefix}chance* texto - Chance de algo acontecer
 *|*
 *|*━━✦༻ _*Feito por: 🦉Faguiro*_ ༺✦`;

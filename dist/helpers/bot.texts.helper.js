@@ -37,7 +37,8 @@ const botTexts = {
     groups_loaded: '✓ Todos os grupos foram carregados e atualizados.',
     admin_registered: `✅ Seu número foi cadastrado como DONO, agora você pode utilizar os comandos de {$p}admin`,
     new_user: "🤖 Boas vindas ao {$1}\n\n" +
-        `👋 Olá {$2}, vi que você é um usuário novo para abrir o menu de comandos digite *{$p}menu*`,
+        `👋 Olá {$2}, 😁 Bora resolver o que você precisa ou só bater papo mesmo?"`+
+        `\n\n⏳ Já já a gente te responde. 😅 Logo mais teremos a resposta fresquinha pra você.\n\n`,
     new_group: "Saudações *{$1}* , se tiverem alguma dúvida só digitar " + `*{$p}menu*`,
     guide_header_text: '❔ USO DO COMANDO ❔\n\n',
     no_guide_found: 'Não foi encontrado um guia para este comando.',

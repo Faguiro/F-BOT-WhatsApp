@@ -178,12 +178,70 @@ export async function comandospvCommand(client, botInfo, message, group) {
     botController.setCommandsPv(!botInfo.commands_pv);
     await waUtil.replyText(client, message.chat_id, replyText, message.wa_message, { expiration: message.expiration });
 }
+
+
 export async function modoadminCommand(client, botInfo, message, group) {
+  try {
     const botController = new BotController();
-    const replyText = botInfo.admin_mode ? adminCommands.modoadmin.msgs.reply_off : adminCommands.modoadmin.msgs.reply_on;
-    botController.setAdminMode(!botInfo.admin_mode);
+    const userController = new UserController();
+    const groupController = new GroupController();
+
+    const callerJid = message.key?.participant || message.key?.remoteJid;
+    const isBotOwner = callerJid === botInfo.ownerJid;
+    const userRecord = await userController.getByJid?.(callerJid);
+    const isBotAdmin = !!userRecord?.isAdmin;
+
+    const isGroupMessage = !!(group && group.id && group.id.endsWith?.('@g.us'));
+
+    // --- Se PV: manter comportamento global (compatibilidade)
+    if (!isGroupMessage) {
+      if (!isBotOwner && !isBotAdmin) {
+        return waUtil.replyText(client, message.chat_id, botTexts.permission.owner_bot_only, message.wa_message, { expiration: message.expiration });
+      }
+      const newGlobal = !Boolean(botInfo.admin_mode);
+      await botController.setAdminMode(newGlobal);
+      const replyText = newGlobal ? adminCommands.modoadmin.msgs.reply_on : adminCommands.modoadmin.msgs.reply_off;
+      return waUtil.replyText(client, message.chat_id, replyText, message.wa_message, { expiration: message.expiration });
+    }
+
+    // --- Aqui: comando usado DENTRO de um GRUPO -> alternar modo por grupo
+    // Permissão para alternar: owner || bot-admin || group-admin
+    const isGroupAdmin = await groupController.isParticipantAdmin(group.id, callerJid);
+
+    if (!isBotOwner && !isBotAdmin && !isGroupAdmin) {
+      return waUtil.replyText(client, message.chat_id,
+        'Apenas administradores do grupo ou administradores do bot podem alterar o modo admin deste grupo.',
+        message.wa_message, { expiration: message.expiration });
+    }
+
+    // pegar config atual do grupo (pode ser null)
+    const currentGroup = await groupController.getGroup(group.id);
+
+    // alternar flag admin_mode (se não existir, criamos)
+    const newAdminMode = !Boolean(currentGroup?.admin_mode);
+
+    if (currentGroup) {
+      // atualiza parcialmente
+      await groupController.updatePartialGroup({ id: group.id, admin_mode: newAdminMode });
+    } else {
+      // registra novo grupo com admin_mode
+      await groupController.registerGroup({ id: group.id, name: group.name || '', admin_mode: newAdminMode });
+    }
+
+    // resposta (usar mensagens específicas por grupo se existir)
+    const replyText = newAdminMode
+      ? (adminCommands.modoadmin.msgs.reply_on_group || adminCommands.modoadmin.msgs.reply_on)
+      : (adminCommands.modoadmin.msgs.reply_off_group || adminCommands.modoadmin.msgs.reply_off);
+
     await waUtil.replyText(client, message.chat_id, replyText, message.wa_message, { expiration: message.expiration });
+  } catch (err) {
+    console.error('modoadminCommand error', err);
+    await waUtil.replyText(client, message.chat_id, 'Erro ao alternar modo admin do grupo.', message.wa_message, { expiration: message.expiration });
+  }
 }
+
+
+
 export async function taxacomandosCommand(client, botInfo, message, group) {
     const botController = new BotController();
     let replyText;

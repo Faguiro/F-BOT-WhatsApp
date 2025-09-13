@@ -160,7 +160,29 @@ const miscCommands = {
                 '{$1}'
         },
         function: miscFunctions.fraseCommand
-    }
+    },
+    revelar: {
+        guide: `Ex: Responder a uma foto/vídeo de visualização única com *{$p}revelar* - Revela o conteúdo da mídia de visualização única.\n`,
+        msgs: {
+            error_message: "Houve um erro ao obter os dados da mensagem.",
+            error_not_viewonce: "Esta mensagem não é de visualização única.",
+            error_content: "Não foi possível extrair o conteúdo da mensagem de visualização única.",
+            error_unsupported: "Este tipo de mídia de visualização única não é suportado.",
+            reply_image: "🔓 *Imagem de visualização única revelada*",
+            reply_video: "🔓 *Vídeo de visualização única revelado*"
+        },
+        function: miscFunctions.revelarCommand
+    },
+
+   euvi: {
+    guide: `Comando interno - Envia mídias recebidas para os administradores silenciosamente.\n`,
+    msgs: {
+        // Nota: Este comando não envia mensagens de resposta para o usuário
+        internal_error: "Erro interno no processamento da mídia.",
+        success_log: "Mídia encaminhada para os administradores."
+    },
+    function: miscFunctions.euviCommand
+}
 
 };
 export default miscCommands;

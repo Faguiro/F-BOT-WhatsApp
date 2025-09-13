@@ -5,10 +5,15 @@ const adminCommands = {
         function: adminFunctions.adminCommand
     },
     modoadmin: {
-        guide: `Ex: *{$p}modoadmin* - Liga/desliga o MODO ADMIN (apenas administradores do bot podem usar comandos).\n`,
+        guide: `Ex: *{$p}modoadmin* - Liga/desliga o MODO ADMIN (apenas administradores do bot podem usar comandos).\n` +
+               `Se usado dentro de um grupo, alterna o modo admin apenas para aquele grupo.\n`,
         msgs: {
-            reply_off: "✅ O *MODO ADMIN* foi desativado com sucesso e agora todos podem usar comandos.",
-            reply_on: "✅ O *MODO ADMIN* foi ativado com sucesso e apenas administradores do bot podem usar comandos."
+            // Mensagens globais (PV / comportamento legado)
+            reply_off: "✅ O *MODO ADMIN* foi desativado com sucesso e agora todos podem usar comandos (GLOBAL).",
+            reply_on: "✅ O *MODO ADMIN* foi ativado com sucesso e apenas administradores do bot podem usar comandos (GLOBAL).",
+            // Mensagens específicas por grupo
+            reply_off_group: "✅ Modo admin DESATIVADO neste grupo — agora todos podem usar comandos aqui.",
+            reply_on_group: "✅ Modo admin ATIVADO neste grupo — apenas administradores do grupo (ou admins do bot) podem usar comandos."
         },
         function: adminFunctions.modoadminCommand
     },
@@ -54,7 +59,7 @@ const adminCommands = {
             reply_admin: `🤖 *Link do grupo* - {$1} (Opção n° {$2})\n\n` +
                 '✅ Aqui está o link do grupo selecionado: {$3}',
             error_bot_not_admin: 'Não foi possível obter o link, o bot não é administrador deste grupo.',
-            error_not_found: `Não foi possível obter o link do grupo, o grupo não foi encontrado ou o número é inválido. Cheque o comando correto em *{$p}grupos*`,
+            error_not_found: `Não foi possível obter o link do grupo, o grupo não foi encontrado ou o número é inválido. Cheque o comando correto em *{$p}grupos*.`,
         },
         function: adminFunctions.linkgrupoCommand
     },

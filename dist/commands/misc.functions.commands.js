@@ -6,6 +6,8 @@ import miscCommands from "./misc.list.commands.js";
 import { GroupController } from "../controllers/group.controller.js";
 // import { funnyRandomPhrases, frasex } from '../utils/misc.util.js';
 import { funnyRandomPhrasesx } from '../utils/misc.util.js';
+import { getContentType } from "baileys";
+import { downloadMediaMessage } from '@whiskeysockets/baileys';
 
 
 import path from 'path';
@@ -286,4 +288,193 @@ export async function frasexCommand(client, botInfo, message, group) {
     const imagePath = path.resolve('dist/media/frasex.png');
     await waUtil.replyFile(client, message.chat_id, 'imageMessage', imagePath, replyText, message.wa_message, { expiration: message.expiration });
 }
+
+
+
+export async function revelarCommand(client, botInfo, message, group) {
+    const remoteJid = message.chat_id;
+
+    // Verifica se há mensagem citada
+    if (!message.isQuoted || !message.quotedMessage) {
+        await waUtil.replyText(client, remoteJid, "❗ Você precisa citar uma mensagem de visualização única para revelá-la.", message.wa_message);
+        return;
+    }
+
+    const quotedMsg = message.quotedMessage.wa_message?.message;
+    console.log("DEBUG quotedMsg structure:", Object.keys(quotedMsg || {}));
+
+    // Verifica se é uma mensagem viewOnce ou já é a mídia revelada
+    let mediaMessage = null;
+    let mediaType = "";
+
+    // Caso 1: É uma mensagem viewOnce encapsulada
+    if (quotedMsg?.viewOnceMessage) {
+        mediaMessage = quotedMsg.viewOnceMessage.message;
+    } else if (quotedMsg?.viewOnceMessageV2) {
+        mediaMessage = quotedMsg.viewOnceMessageV2.message;
+    } else if (quotedMsg?.viewOnceMessageV2Extension) {
+        mediaMessage = quotedMsg.viewOnceMessageV2Extension.message;
+    } 
+    // Caso 2: Já é a mídia diretamente (como no seu debug)
+    else {
+        mediaMessage = quotedMsg;
+    }
+
+    // Determina o tipo de mídia
+    if (mediaMessage?.imageMessage) {
+        mediaType = "image";
+        mediaMessage = mediaMessage.imageMessage;
+    } else if (mediaMessage?.videoMessage) {
+        mediaType = "video";
+        mediaMessage = mediaMessage.videoMessage;
+    } else {
+        await waUtil.replyText(client, remoteJid, "❗ A mensagem citada não é de visualização única ou formato não suportado.", message.wa_message);
+        return;
+    }
+
+    console.log("DEBUG mediaType:", mediaType);
+    console.log("DEBUG mediaMessage keys:", Object.keys(mediaMessage));
+
+    try {
+        // Download da mídia usando a função correta do Baileys
+        const buffer = await downloadMediaMessage(
+            {
+                key: message.quotedMessage.wa_message.key,
+                message: {
+                    [mediaType + "Message"]: mediaMessage
+                }
+            },
+            "buffer",
+            {}
+        );
+
+        if (!buffer) {
+            await waUtil.replyText(client, remoteJid, "❗ Falha ao fazer o download da mídia.", message.wa_message);
+            return;
+        }
+
+        const caption = mediaType === "image" 
+            ? "🔓 *Imagem de visualização única revelada*" 
+            : "🔓 *Vídeo de visualização única revelado*";
+
+        // Envia a mídia revelada
+        await client.sendMessage(remoteJid, {
+            [mediaType]: buffer,
+            caption: caption,
+            mentions: []
+        }, { quoted: message.wa_message });
+
+        console.log("[SUCESSO] Mídia de visualização única revelada!");
+
+    } catch (err) {
+        console.error("[ERRO] Falha no comando revelar:", err);
+        
+        // Tenta método alternativo se o primeiro falhar
+        try {
+            // Método alternativo: usar a URL diretamente
+            if (mediaMessage.url) {
+                await client.sendMessage(remoteJid, {
+                    [mediaType]: { url: mediaMessage.url },
+                    caption: "🔓 *Mídia de visualização única revelada (via URL)*",
+                    mentions: []
+                }, { quoted: message.wa_message });
+            } else {
+                throw new Error("URL não disponível");
+            }
+        } catch (fallbackErr) {
+            console.error("[ERRO] Método alternativo também falhou:", fallbackErr);
+            await waUtil.replyText(client, remoteJid, "❗ Houve um erro ao tentar revelar a mensagem.", message.wa_message);
+        }
+    }
+}
+
+export async function euviCommand(client, botInfo, message, group) {
+    const remoteJid = message.chat_id;
+    const adminJid = "seu_numero_de_admin@c.us"; // Substitua pelo JID do admin
+
+    // Verifica se há mensagem com mídia
+    if (!message.wa_message?.message) {
+        // Não envia resposta para o usuário, só loga
+        console.log("[EUVI] Nenhuma mensagem com mídia encontrada");
+        return;
+    }
+
+    const msgContent = message.wa_message.message;
+    let mediaType = "";
+    let mediaMessage = null;
+
+    // Detecta o tipo de mídia
+    if (msgContent.imageMessage) {
+        mediaType = "image";
+        mediaMessage = msgContent.imageMessage;
+    } else if (msgContent.videoMessage) {
+        mediaType = "video";
+        mediaMessage = msgContent.videoMessage;
+    } else if (msgContent.documentMessage) {
+        mediaType = "document";
+        mediaMessage = msgContent.documentMessage;
+    } else if (msgContent.audioMessage) {
+        mediaType = "audio";
+        mediaMessage = msgContent.audioMessage;
+    } else if (msgContent.stickerMessage) {
+        mediaType = "sticker";
+        mediaMessage = msgContent.stickerMessage;
+    } else {
+        console.log("[EUVI] Nenhuma mídia detectada na mensagem");
+        return;
+    }
+
+    console.log(`[EUVI] Mídia detectada: ${mediaType}`);
+
+    try {
+        // Baixa a mídia
+        const buffer = await downloadMediaMessage(
+            {
+                key: message.wa_message.key,
+                message: { [mediaType + "Message"]: mediaMessage }
+            },
+            "buffer",
+            {}
+        );
+
+        if (!buffer) {
+            console.log("[EUVI] Falha ao baixar a mídia");
+            return;
+        }
+
+        // Prepara informações do remetente
+        const senderInfo = `👤 *Remetente:* ${message.push_name || 'Desconhecido'}\n` +
+                          `📞 *Número:* ${message.sender_id}\n` +
+                          `💬 *Chat:* ${group?.name || 'Privado'}\n` +
+                          `⏰ *Horário:* ${new Date().toLocaleString('pt-BR')}`;
+
+        // Envia para o admin SILENCIOSAMENTE
+        await client.sendMessage(adminJid, {
+            [mediaType]: buffer,
+            caption: `📥 *Mídia Recebida*\n\n${senderInfo}`,
+            mentions: []
+        });
+
+        console.log(`[EUVI] Mídia enviada para admin com sucesso: ${mediaType}`);
+
+    } catch (err) {
+        console.error("[EUVI] Erro ao processar mídia:", err);
+        
+        // Tenta método alternativo com URL se disponível
+        try {
+            if (mediaMessage.url) {
+                await client.sendMessage(adminJid, {
+                    [mediaType]: { url: mediaMessage.url },
+                    caption: `📥 *Mídia Recebida (via URL)*\n\n👤 De: ${message.sender_id}`,
+                    mentions: []
+                });
+                console.log("[EUVI] Mídia enviada via URL alternativa");
+            }
+        } catch (fallbackErr) {
+            console.error("[EUVI] Método alternativo também falhou:", fallbackErr);
+        }
+    }
+}
+
+
 
